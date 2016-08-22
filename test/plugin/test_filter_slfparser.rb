@@ -19,7 +19,7 @@ type slfparser
 
   class TestConfigure < self
 
-    def test_add_tournament
+    def test_java_backend_log
       d = create_driver(CONFIG1, 'test.message')
       time = Time.parse('2012-07-20 16:40:30').to_i
 
@@ -40,6 +40,10 @@ type slfparser
       assert_equal 'fb1b809201545b179ff0263bd903a470b1b8ad80cbe9cd5560aa432cfc3d4e4a', m['container_id']
 
       assert_equal 'bundesliga', m['tournament']
+      assert_equal 'java-backend', m['type']
+      assert_equal 'Thread-10', m['java-thread']
+      assert_equal 'INFO', m['java-level']
+      assert_equal 'de.kajzar.common.backend.sync.sns.AmazonServices', m['java-logger']
     end
 
 

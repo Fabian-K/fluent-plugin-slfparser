@@ -17,21 +17,35 @@ class Fluent::SLFParserFilter < Fluent::Filter
       #puts "Time: " + time.to_s
       #puts "Record: " + record.to_s
 
-      # append tournament based on container_name
-      if (record['container_name'].include? "bl-backend")
-        record = record.merge({
-                                  'tournament' => 'bundesliga'
-                              })
+      unless record['log'].nil?
+
+        if match = record['log'].match(/^\[(.+)\] (\w+) ([a-z.]+) .*/i)
+          thread, level, logger = match.captures
+          record = record.merge({'java-thread' => thread, 'java-level' => level, 'java-logger' => logger})
+        end
+
       end
-      if (record['container_name'].include? "bl2-backend")
-        record = record.merge({
-                                  'tournament' => 'liga2'
-                              })
-      end
-      if (record['container_name'].include? "l3-backend")
-        record = record.merge({
-                                  'tournament' => 'liga3'
-                              })
+
+      unless record['container_name'].nil?
+        # append tournament based on container_name
+        if (record['container_name'].include? "bl-backend")
+          record = record.merge({
+                                    'tournament' => 'bundesliga',
+                                    'type' => 'java-backend'
+                                })
+        end
+        if (record['container_name'].include? "bl2-backend")
+          record = record.merge({
+                                    'tournament' => 'liga2',
+                                    'type' => 'java-backend'
+                                })
+        end
+        if (record['container_name'].include? "l3-backend")
+          record = record.merge({
+                                    'tournament' => 'liga3',
+                                    'type' => 'java-backend'
+                                })
+        end
       end
 
       new_es.add(time, record.dup)
