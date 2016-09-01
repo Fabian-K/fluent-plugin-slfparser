@@ -17,11 +17,13 @@ class Fluent::SLFParserFilter < Fluent::Filter
       #puts "Time: " + time.to_s
       #puts "Record: " + record.to_s
 
+      record['time'] = time
+
       unless record['log'].nil?
 
         if match = record['log'].match(/^\[(.+)\] (\w+) ([a-z.]+) .*/i)
           thread, level, logger = match.captures
-          record = record.merge({'java-thread' => thread, 'java-level' => level, 'java-logger' => logger})
+          record = record.merge({'java-thread' => thread, 'severity' => level, 'java-logger' => logger})
         end
 
       end

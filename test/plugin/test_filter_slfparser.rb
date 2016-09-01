@@ -42,8 +42,9 @@ type slfparser
       assert_equal 'bundesliga', m['tournament']
       assert_equal 'java-backend', m['type']
       assert_equal 'Thread-10', m['java-thread']
-      assert_equal 'INFO', m['java-level']
+      assert_equal 'INFO', m['severity']
       assert_equal 'de.kajzar.common.backend.sync.sns.AmazonServices', m['java-logger']
+      assert_equal time, m['time']
     end
 
 
