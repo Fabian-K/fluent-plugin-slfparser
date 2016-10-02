@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = "fluent-plugin-slfparser"
-  gem.version       = "0.0.4"
+  gem.version       = "0.0.5"
   gem.authors       = ["Fabian Kajzar"]
   gem.email         = ["fabiankajzar@gmail.com"]
   gem.description   = %q{parsing of SLF4J based logs. }
