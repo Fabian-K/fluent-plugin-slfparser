@@ -48,6 +48,29 @@ class Fluent::SLFParserFilter < Fluent::Filter
                                     'type' => 'java-backend'
                                 })
         end
+        if (record['container_name'].include? "k8s_router")
+          record = record.merge({
+                                    'type' => 'java-router'
+                                })
+
+          # additional http access log parsing
+          if match = record['log'].match(/ ([0-9]{3}) /i)
+            status = match.captures[0]
+
+            severity = 'INFO'
+
+            if (status.to_i >= 500)
+              severity = 'WARNING'
+            end
+
+            record = record.merge({'status' => status,
+                                   'severity' => severity})
+
+
+          end
+
+
+        end
       end
 
       new_es.add(time, record.dup)
