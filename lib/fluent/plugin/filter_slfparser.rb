@@ -68,9 +68,12 @@ class Fluent::SLFParserFilter < Fluent::Filter
 
 
           end
-
-
         end
+      end
+
+      # check for garbage collection
+      if (record['source'] == 'stdout' && record['type'] == 'java-backend')
+        record = record.merge({'java-logger' => 'GarbageCollection', 'severity' => 'DEBUG'})
       end
 
       new_es.add(time, record.dup)

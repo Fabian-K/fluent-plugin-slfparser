@@ -117,8 +117,31 @@ type slfparser
       assert_equal 'WARNING', m['severity']
     end
 
-    # TODO HTTP 500 test with
-    #
+    def test_gc_log_message
+      d = create_driver(CONFIG1, 'test.message')
+      time = Time.parse('2012-07-20 16:40:30').to_i
+
+      d.run do
+        d.filter({'log' => '[GC (Allocation Failure) [DefNew: 18334K->294K(19840K), 0.0101717 secs] 36294K->18260K(63552K), 0.0126504 secs] [Times: user=0.01 sys=0.00, real=0.01 secs]',
+                  'source' => 'stdout',
+                  'container_name' => "/k8s_l3-backend.96d460e4_battleship-battleship_default_2e46cb2d2a6b3ce2ac5412d5f78422cf_ee4a73e4",
+                  'container_id' => "f1017b62aee6a36506871909a5d85a0817b3c081cd29c977579fc4142e6e1907"}, time)
+      end
+
+      filtered = d.filtered_as_array # // [tag, timestamp, hashmap]
+      m = filtered[0][2];
+
+      # don´t modify existing fields
+      assert_equal 'stdout', m['source']
+      assert_equal '[GC (Allocation Failure) [DefNew: 18334K->294K(19840K), 0.0101717 secs] 36294K->18260K(63552K), 0.0126504 secs] [Times: user=0.01 sys=0.00, real=0.01 secs]', m['log']
+      assert_equal '/k8s_l3-backend.96d460e4_battleship-battleship_default_2e46cb2d2a6b3ce2ac5412d5f78422cf_ee4a73e4', m['container_name']
+      assert_equal 'f1017b62aee6a36506871909a5d85a0817b3c081cd29c977579fc4142e6e1907', m['container_id']
+      assert_equal 'java-backend', m['type']
+      assert_equal 'liga3', m['tournament']
+      assert_equal 'DEBUG', m['severity']
+      assert_equal 'GarbageCollection', m['java-logger']
+    end
+
 
   end
 end
