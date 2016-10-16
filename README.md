@@ -2,7 +2,7 @@
 
 ## Release
 * bundler exec rake build
-* gem push pkg/fluent-plugin-slfparser-X.X.X.gem
+* bundler exec rake release
 
 ## Copyright
 
