@@ -48,6 +48,22 @@ class Fluent::SLFParserFilter < Fluent::Filter
                                     'type' => 'java-backend'
                                 })
         end
+        if (record['container_name'].include? "tt-backend")
+          record = record.merge({
+                                    'tournament' => 'tt',
+                                    'type' => 'java-backend'
+                                })
+        end
+        if (record['container_name'].include? "twitter-module")
+          record = record.merge({
+                                    'type' => 'java-twitter'
+                                })
+        end
+        if (record['container_name'].include? "pub-sub-module")
+          record = record.merge({
+                                    'type' => 'java-pubsub'
+                                })
+        end
         if (record['container_name'].include? "k8s_router")
           record = record.merge({
                                     'type' => 'java-router'
@@ -72,7 +88,7 @@ class Fluent::SLFParserFilter < Fluent::Filter
       end
 
       # check for garbage collection
-      if (record['source'] == 'stdout' && record['type'] == 'java-backend')
+      if (record['source'] == 'stdout' && (record['type'] == 'java-backend' || record['type'] == 'java-twitter' || record['type'] == 'java-pubsub' ))
         record = record.merge({'java-logger' => 'GarbageCollection', 'severity' => 'DEBUG'})
       end
 
