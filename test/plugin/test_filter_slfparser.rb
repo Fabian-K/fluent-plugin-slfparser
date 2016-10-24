@@ -89,8 +89,38 @@ type slfparser
       assert_equal '/k8s_router.3c190b01_battleship-battleship_default_2e46cb2d2a6b3ce2ac5412d5f78422cf_df360a04', m['container_name']
       assert_equal 'f1017b62aee6a36506871909a5d85a0817b3c081cd29c977579fc4142e6e1907', m['container_id']
       assert_equal 'java-router', m['type']
-      assert_equal '200', m['status']
+      assert_equal '200', m['http_status']
       assert_equal 'INFO', m['severity']
+    end
+
+    def test_parse_http_log_uptime
+      d = create_driver(CONFIG1, 'test.message')
+      time = Time.parse('2012-07-20 16:40:30').to_i
+
+      d.run do
+        d.filter({'log' => '104.155.110.139 - - [24/Oct/2016:04:03:17 +0000] "GET /api/status HTTP/1.1" 200 2 "-" "GoogleStackdriverMonitoring-UptimeChecks(https://cloud.google.com/monitoring)" "-"',
+                  'source' => 'stdout',
+                  'container_name' => "/k8s_router.3c190b01_battleship-battleship_default_2e46cb2d2a6b3ce2ac5412d5f78422cf_df360a04",
+                  'container_id' => "f1017b62aee6a36506871909a5d85a0817b3c081cd29c977579fc4142e6e1907"}, time)
+      end
+
+      filtered = d.filtered_as_array # // [tag, timestamp, hashmap]
+      m = filtered[0][2];
+
+      # don´t modify existing fields
+      assert_equal 'stdout', m['source']
+      assert_equal '104.155.110.139 - - [24/Oct/2016:04:03:17 +0000] "GET /api/status HTTP/1.1" 200 2 "-" "GoogleStackdriverMonitoring-UptimeChecks(https://cloud.google.com/monitoring)" "-"', m['log']
+      assert_equal '/k8s_router.3c190b01_battleship-battleship_default_2e46cb2d2a6b3ce2ac5412d5f78422cf_df360a04', m['container_name']
+      assert_equal 'f1017b62aee6a36506871909a5d85a0817b3c081cd29c977579fc4142e6e1907', m['container_id']
+      assert_equal 'java-router', m['type']
+      assert_equal 'DEBUG', m['severity']
+
+      # http specific
+      assert_equal '200', m['http_status']
+      assert_equal 'GET', m['http_method']
+      assert_equal '/api/status', m['http_request']
+      assert_equal '2', m['http_bytes']
+      assert_equal 'GoogleStackdriverMonitoring-UptimeChecks(https://cloud.google.com/monitoring)', m['http_user_agent']
     end
 
     def test_parse_http_log_500
@@ -113,7 +143,7 @@ type slfparser
       assert_equal '/k8s_router.3c190b01_battleship-battleship_default_2e46cb2d2a6b3ce2ac5412d5f78422cf_df360a04', m['container_name']
       assert_equal 'f1017b62aee6a36506871909a5d85a0817b3c081cd29c977579fc4142e6e1907', m['container_id']
       assert_equal 'java-router', m['type']
-      assert_equal '500', m['status']
+      assert_equal '500', m['http_status']
       assert_equal 'WARNING', m['severity']
     end
 

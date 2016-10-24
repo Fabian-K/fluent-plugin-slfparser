@@ -70,8 +70,14 @@ class Fluent::SLFParserFilter < Fluent::Filter
                                 })
 
           # additional http access log parsing
-          if match = record['log'].match(/ ([0-9]{3}) /i)
-            status = match.captures[0]
+          if match = record['log'].match(/(.*?)-(.*?)- \[(.*?)\] "(GET|POST|PUT|DELETE|OPTIONS|HEAD|TRACE) (.*?) (HTTP)\/(.*?)" (\d*) (\d*) "(.*?)" "(.*?)" "(.*?)"/i)
+
+            # puts match.captures.inspect
+            status = match.captures[7]
+            method = match.captures[3]
+            request = match.captures[4]
+            bytes = match.captures[8]
+            userAgent = match.captures[10]
 
             severity = 'INFO'
 
@@ -79,16 +85,23 @@ class Fluent::SLFParserFilter < Fluent::Filter
               severity = 'WARNING'
             end
 
-            record = record.merge({'status' => status,
-                                   'severity' => severity})
+            if (userAgent == 'GoogleStackdriverMonitoring-UptimeChecks(https://cloud.google.com/monitoring)')
+              severity = 'DEBUG'
+            end
 
+            record = record.merge({'http_status' => status,
+                                   'http_method' => method,
+                                   'http_request' => request,
+                                   'http_bytes' => bytes,
+                                   'http_user_agent' => userAgent,
+                                   'severity' => severity})
 
           end
         end
       end
 
       # check for garbage collection
-      if (record['source'] == 'stdout' && (record['type'] == 'java-backend' || record['type'] == 'java-twitter' || record['type'] == 'java-pubsub' ))
+      if (record['source'] == 'stdout' && (record['type'] == 'java-backend' || record['type'] == 'java-twitter' || record['type'] == 'java-pubsub'))
         record = record.merge({'java-logger' => 'GarbageCollection', 'severity' => 'DEBUG'})
       end
 
